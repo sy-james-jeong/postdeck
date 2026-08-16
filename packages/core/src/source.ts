@@ -19,6 +19,7 @@ export interface BlogSource {
 export interface SourceDeps {
   fileStore?: FileStore
   env: (name: string) => string | undefined
+  fetchImpl?: typeof fetch
 }
 
 export type SourceFactory = (cfg: BlogConfig, deps: SourceDeps) => BlogSource
