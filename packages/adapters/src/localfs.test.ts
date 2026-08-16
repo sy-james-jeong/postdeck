@@ -23,3 +23,13 @@ test('read returns written content; list finds it', async () => {
   expect(await fs.read('posts/a.md')).toBe('hello')
   expect(await fs.list('posts')).toContain('a.md')
 })
+
+test('write rejects a path that escapes rootDir', async () => {
+  const fs = createLocalFs(root)
+  await expect(fs.write('../escape.md', 'x', { message: 'm' })).rejects.toThrow(/escape/i)
+})
+
+test('read rejects a path that escapes rootDir', async () => {
+  const fs = createLocalFs(root)
+  await expect(fs.read('../x')).rejects.toThrow(/escape/i)
+})

@@ -38,6 +38,12 @@ test('list maps datePublished->date and description->excerpt', async () => {
   expect(post.raw.order).toBe(2)   // original preserved through RawPost.raw
 })
 
+test('read() throws until L2 implements it', async () => {
+  const root = repo()
+  const src = resolveSource(cfg('guides'), { env: () => undefined, fileStore: createLocalFs(root) })
+  await expect(src.read('anything')).rejects.toThrow(/not implemented/i)
+})
+
 test('createDraft writes frontmatter in the project field-map naming', async () => {
   const root = repo()
   const src = resolveSource(cfg('guides'), { env: () => undefined, fileStore: createLocalFs(root) })
