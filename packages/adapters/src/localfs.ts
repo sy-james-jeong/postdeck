@@ -2,7 +2,7 @@ import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises'
 import { dirname, resolve, sep } from 'node:path'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import type { FileStore } from '@blogmanager/core'
+import type { FileStore } from '@postdeck/core'
 
 const run = promisify(execFile)
 

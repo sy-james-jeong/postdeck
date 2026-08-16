@@ -1,4 +1,4 @@
-import { resolveSource, toPost, groupTranslations, type BlogsConfig, type SourceDeps, type Post } from '@blogmanager/core'
+import { resolveSource, toPost, groupTranslations, type BlogsConfig, type SourceDeps, type Post } from '@postdeck/core'
 
 export async function loadPosts(
   config: BlogsConfig,

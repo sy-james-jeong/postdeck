@@ -1,4 +1,4 @@
-import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@blogmanager/core'
+import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@postdeck/core'
 
 type Prop = any
 const readText = (p: Prop): string => {

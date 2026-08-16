@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { expect, test } from 'vitest'
-import { resolveSource, toPost, type BlogConfig } from '@blogmanager/core'
+import { resolveSource, toPost, type BlogConfig } from '@postdeck/core'
 import './index.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
