@@ -27,5 +27,13 @@ export function patchFrontmatter(raw: string, patch: Record<string, unknown>): s
   for (const [k, v] of Object.entries(patch)) doc.set(k, v)
   // Re-stitch: yaml.stringify keeps a trailing newline; match original delimiters.
   const yamlText = doc.toString().replace(/\n$/, '')
-  return `---\n${yamlText}\n---\n${m[2]}`
+  // The `yaml` stringifier always emits LF. If the source frontmatter block was
+  // CRLF-authored, normalize the rebuilt frontmatter block (only) to CRLF so the
+  // output doesn't mix line-ending styles. The body (m[2]) is carried through
+  // verbatim from `raw` and already has whatever ending style it started with.
+  const frontmatterSource = raw.slice(0, raw.length - m[2].length)
+  const usesCRLF = /\r\n/.test(frontmatterSource)
+  let frontmatterBlock = `---\n${yamlText}\n---\n`
+  if (usesCRLF) frontmatterBlock = frontmatterBlock.replace(/\r?\n/g, '\r\n')
+  return frontmatterBlock + m[2]
 }

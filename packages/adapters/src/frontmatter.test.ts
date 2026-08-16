@@ -27,9 +27,22 @@ test('patching one key preserves every unmapped key, order, and the nested map',
   expect(data.order).toBe(4)
   expect((data.shortAnswer as any).label).toBe('The short answer')
   expect(data.ctaHeading).toBe("See your province's number")
+  expect(data.tags).toEqual(['tax', 'canada'])
   // key order unchanged: slug still before order still before title
   expect(out.indexOf('slug:')).toBeLessThan(out.indexOf('order:'))
   expect(out.indexOf('order:')).toBeLessThan(out.indexOf('title:'))
   // body untouched
   expect(out).toContain('## How we ranked these')
+})
+
+test('CRLF source stays a single consistent line-ending style after a patch', () => {
+  const crlfDoc = ['---', 'title: Hello', 'count: 1', '---', '', 'Body text here.', ''].join(
+    '\r\n',
+  )
+  const out = patchFrontmatter(crlfDoc, { count: 2 })
+  // the patch actually applied
+  const { data } = parseFrontmatter(out)
+  expect(data.count).toBe(2)
+  // no mixed endings: every \n is part of a \r\n pair (strip valid pairs, none should remain)
+  expect(out.replace(/\r\n/g, '')).not.toContain('\n')
 })
