@@ -1,0 +1,18 @@
+{
+  "object": "list",
+  "results": [
+    {
+      "id": "page-1",
+      "properties": {
+        "Title": { "type": "title", "title": [{ "plain_text": "Shipping fast" }] },
+        "Slug": { "type": "rich_text", "rich_text": [{ "plain_text": "shipping-fast" }] },
+        "Date": { "type": "date", "date": { "start": "2026-07-01" } },
+        "Excerpt": { "type": "rich_text", "rich_text": [{ "plain_text": "Notes" }] },
+        "Status": { "type": "status", "status": { "name": "Published" } },
+        "Tags": { "type": "multi_select", "multi_select": [{ "name": "design" }] }
+      }
+    }
+  ],
+  "has_more": false,
+  "next_cursor": null
+}
