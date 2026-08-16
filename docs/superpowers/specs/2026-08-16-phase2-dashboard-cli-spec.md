@@ -1,9 +1,9 @@
-# BlogManager — Phase 2 Spec: Dashboard (L1) + CLI
+# PostDeck — Phase 2 Spec: Dashboard (L1) + CLI
 
 - **작성일**: 2026-08-16
 - **상태**: 다음 착수 대상 (Plan 1 엔진은 완료·main 병합됨)
 - **이 문서의 목적**: 새 세션이 이 폴더에서 브레인스토밍→writing-plans→빌드로 바로 이어가도록 다음 단계를 명세.
-- **선행 문서**: `docs/superpowers/specs/2026-08-16-blog-manager-design.md` (전체 설계), `docs/superpowers/plans/2026-08-16-blog-manager-core-adapters.md` (Plan 1).
+- **선행 문서**: `docs/superpowers/specs/2026-08-16-postdeck-design.md` (전체 설계), `docs/superpowers/plans/2026-08-16-postdeck-core-adapters.md` (Plan 1).
 
 ---
 
@@ -12,16 +12,16 @@
 `main`에 병합됨. 28 테스트 통과, `pnpm run typecheck` 클린.
 
 **패키지:**
-- `@blogmanager/core` — 순수 도메인 (zod만 런타임 의존). Post 모델, 직렬화 config, status 정규화, 다국어 그룹핑, `BlogSource`/`FileStore` 인터페이스, 어댑터 레지스트리.
-- `@blogmanager/adapters` — round-trip 안전 frontmatter, `localFs` FileStore, `markdown`/`astro-collection`/`notion` 어댑터, `loadPosts` 엔진.
+- `@postdeck/core` — 순수 도메인 (zod만 런타임 의존). Post 모델, 직렬화 config, status 정규화, 다국어 그룹핑, `BlogSource`/`FileStore` 인터페이스, 어댑터 레지스트리.
+- `@postdeck/adapters` — round-trip 안전 frontmatter, `localFs` FileStore, `markdown`/`astro-collection`/`notion` 어댑터, `loadPosts` 엔진.
 
 **이미 쓸 수 있는 엔진 API 표면** (Phase 2가 소비할 것):
 ```ts
-// @blogmanager/adapters
+// @postdeck/adapters
 loadPosts(config: BlogsConfig, deps: SourceDeps, now?: Date): Promise<Record<string, Post[]>>
 createLocalFs(rootDir: string): FileStore
 
-// @blogmanager/core
+// @postdeck/core
 defineBlogs(list: BlogConfig[]): BlogsConfig
 notionSource({databaseId, tokenRef}) / markdownSource({dir}) / astroCollectionSource({dir, langs})
 // SourceDeps = { fileStore?: FileStore; env: (name)=>string|undefined; fetchImpl?: typeof fetch }
@@ -65,7 +65,7 @@ notionSource({databaseId, tokenRef}) / markdownSource({dir}) / astroCollectionSo
 
 시크릿은 `.env`(gitignore) + `tokenRef`로 env 참조. 절대 config에 인라인 금지.
 
-### 1.4 CLI (`npx blogmanager`)
+### 1.4 CLI (`npx postdeck`)
 
 - `apps/cli`: cwd(또는 지정 경로)의 `blogs.config.ts`를 읽어 로컬 대시보드(Next)를 부팅. OSS 사용자의 진입점.
 - 최소 기능: 부팅 + 브라우저 오픈. 옵션 파싱 최소(YAGNI).
@@ -95,4 +95,4 @@ AI 작성 + De-AI 검토 파이프라인. `createDraft` 쓰기 경로는 이미 
 2. `superpowers:writing-plans`로 Plan 2 작성 (bite-sized TDD).
 3. `superpowers:subagent-driven-development`로 실행.
 
-시작 시 반드시 읽을 것: 이 문서 + `2026-08-16-blog-manager-design.md` + `.superpowers/sdd/progress.md`(이월 항목).
+시작 시 반드시 읽을 것: 이 문서 + `2026-08-16-postdeck-design.md` + `.superpowers/sdd/progress.md`(이월 항목).

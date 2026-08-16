@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test } from 'vitest'
-import { resolveSource, type BlogConfig } from '@blogmanager/core'
+import { resolveSource, type BlogConfig } from '@postdeck/core'
 import './index.js'
 import { createLocalFs } from './localfs.js'
 

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { expect, test } from 'vitest'
-import { resolveSource, toPost, type BlogConfig } from '@blogmanager/core'
+import { resolveSource, toPost, type BlogConfig } from '@postdeck/core'
 import './index.js'  // side-effect: registers adapters
 import { createLocalFs } from './localfs.js'
 

@@ -1,5 +1,5 @@
 {
-  "name": "blogmanager-monorepo",
+  "name": "postdeck-monorepo",
   "private": true,
   "type": "module",
   "scripts": {

@@ -1,9 +1,9 @@
-# BlogManager — 설계 문서 (Design Spec)
+# PostDeck — 설계 문서 (Design Spec)
 
 - **작성일**: 2026-08-16
 - **상태**: 설계 확정, 구현 계획 대기
-- **도구명**: BlogManager · CLI `blogmanager` · 패키지 `@blogmanager/core`, `@blogmanager/adapters`
-- **npm**: `blogmanager` / `@blogmanager/*` 사용 가능 확인됨 (2026-08-16)
+- **도구명**: PostDeck · CLI `postdeck` · 패키지 `@postdeck/core`, `@postdeck/adapters`
+- **npm**: `postdeck` / `@postdeck/*` 사용 가능 확인됨 (2026-08-16)
 
 ---
 
@@ -20,7 +20,7 @@
 ### 차별점 (positioning)
 
 Front Matter CMS / Keystatic / Decap / Tina 는 전부 **"레포 하나 안의 콘텐츠 편집"**이다.
-BlogManager의 차별점은 두 가지이며 README 첫 줄에 박는다:
+PostDeck의 차별점은 두 가지이며 README 첫 줄에 박는다:
 
 > **여러 프로젝트 · 여러 소스 타입(Notion/Astro/Markdown)을 한 화면에서 + AI 작성/De-AI 검토 파이프라인.**
 
@@ -63,7 +63,7 @@ packages/
 apps/
   dashboard/   # Next.js(App Router). React UI + API routes(fs·git·Notion 토큰은 서버측).
                # 나중에 그대로 유료 멀티테넌트 웹앱으로 승격.
-  cli/         # `npx blogmanager` — cwd의 blogs.config 읽어 dashboard를 로컬 부팅.
+  cli/         # `npx postdeck` — cwd의 blogs.config 읽어 dashboard를 로컬 부팅.
 blogs.config.ts # 사용자 소유 계약. 관리 대상 블로그 등록 + 필드매핑 (data-only).
 ```
 
@@ -243,7 +243,7 @@ fieldMap이 읽기·쓰기 양쪽에서 값을 하므로, 저장 결과가 각 �
 3. `adapters`: `FileStore(localFs)` + `markdown` / `astro-collection` / `notion` + 레지스트리.
 4. `apps/dashboard`: L1 읽기 대시보드 (카드 + 캘린더, capability 반영 표기).
 5. `apps/dashboard`: L2 AI 작성/검토 파이프라인 + createDraft.
-6. `apps/cli`: `npx blogmanager` 부팅.
+6. `apps/cli`: `npx postdeck` 부팅.
 7. (L2 검증 후) L3 제안 — 발행 오케스트레이션 + 재빌드 훅.
 
 ---

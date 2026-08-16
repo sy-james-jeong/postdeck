@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test } from 'vitest'
-import { defineBlogs, markdownSource } from '@blogmanager/core'
+import { defineBlogs, markdownSource } from '@postdeck/core'
 import { loadPosts, createLocalFs } from './index.js'
 
 test('loadPosts returns normalized posts keyed by project', async () => {

@@ -20,7 +20,7 @@ importers:
 
   packages/adapters:
     dependencies:
-      '@blogmanager/core':
+      '@postdeck/core':
         specifier: workspace:*
         version: link:../core
       yaml:

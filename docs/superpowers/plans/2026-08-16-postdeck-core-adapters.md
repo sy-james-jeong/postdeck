@@ -1,17 +1,17 @@
-# BlogManager — Core + Adapters Implementation Plan
+# PostDeck — Core + Adapters Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the framework-agnostic engine — Post model, serializable config, status normalization, translation grouping, a FileStore port, and three first-party BlogSource adapters (markdown / astro-collection / notion) — such that `list()` returns normalized Posts and `createDraft()` writes round-trip-safe (never destroys unmapped frontmatter).
 
-**Architecture:** Hexagonal. `@blogmanager/core` is pure TS with zero fs/Notion/Next dependencies — it defines the `Post` domain, the `BlogSource`/`FileStore` interfaces, config Zod schemas, and normalization logic. `@blogmanager/adapters` implements the interfaces (localFs FileStore + three sources) and registers them in a `type`-keyed registry. Config is data-only (discriminated union) so it can later be stored per-tenant in a DB.
+**Architecture:** Hexagonal. `@postdeck/core` is pure TS with zero fs/Notion/Next dependencies — it defines the `Post` domain, the `BlogSource`/`FileStore` interfaces, config Zod schemas, and normalization logic. `@postdeck/adapters` implements the interfaces (localFs FileStore + three sources) and registers them in a `type`-keyed registry. Config is data-only (discriminated union) so it can later be stored per-tenant in a DB.
 
 **Tech Stack:** TypeScript (ESM), pnpm workspaces, vitest, `yaml` (eemeli/yaml Document API for round-trip-safe frontmatter), `zod` (config schemas), Node built-in `fs`/`child_process` (git commits in localFs), `fetch` (Notion API).
 
 ## Global Constraints
 
 - **Node** ≥ 20, **TypeScript** ESM (`"type": "module"`, `"module": "NodeNext"`).
-- **Package names:** `@blogmanager/core`, `@blogmanager/adapters` (npm scope `@blogmanager/*` confirmed free 2026-08-16).
+- **Package names:** `@postdeck/core`, `@postdeck/adapters` (npm scope `@postdeck/*` confirmed free 2026-08-16).
 - **`core` has ZERO runtime dependency on** `fs`, `child_process`, `next`, Notion, or any adapter. Only `zod` is allowed as a core runtime dep. Enforced by review.
 - **Config is data-only:** `SourceConfig` is a JSON-serializable discriminated union keyed by `type`. Helper functions (`defineBlogs`, `notionSource`, …) are typed constructors that return plain data — no closures, no functions in the output.
 - **Writes are patches, never overwrites:** `createDraft`/updates touch only keys present in `fieldMap`; every other frontmatter key, its order, and comments are preserved via the `yaml` Document API. Non-negotiable invariant — the round-trip diff==0 test (Task 3) gates all write code.
@@ -38,7 +38,7 @@
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: a working `pnpm -w test` command; `@blogmanager/core` and `@blogmanager/adapters` resolvable via workspace.
+- Produces: a working `pnpm -w test` command; `@postdeck/core` and `@postdeck/adapters` resolvable via workspace.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -69,7 +69,7 @@ packages:
 Root `package.json`:
 ```json
 {
-  "name": "blogmanager-monorepo",
+  "name": "postdeck-monorepo",
   "private": true,
   "type": "module",
   "scripts": { "test": "vitest run", "test:watch": "vitest" },
@@ -97,7 +97,7 @@ export default defineConfig({ test: { include: ['packages/**/*.test.ts'] } })
 `packages/core/package.json`:
 ```json
 {
-  "name": "@blogmanager/core", "version": "0.0.0", "type": "module",
+  "name": "@postdeck/core", "version": "0.0.0", "type": "module",
   "main": "./src/index.ts", "types": "./src/index.ts",
   "exports": { ".": "./src/index.ts" },
   "dependencies": { "zod": "^3.23.0" }
@@ -117,10 +117,10 @@ export const VERSION = '0.0.0'
 `packages/adapters/package.json`:
 ```json
 {
-  "name": "@blogmanager/adapters", "version": "0.0.0", "type": "module",
+  "name": "@postdeck/adapters", "version": "0.0.0", "type": "module",
   "main": "./src/index.ts", "types": "./src/index.ts",
   "exports": { ".": "./src/index.ts" },
-  "dependencies": { "@blogmanager/core": "workspace:*", "yaml": "^2.5.0" }
+  "dependencies": { "@postdeck/core": "workspace:*", "yaml": "^2.5.0" }
 }
 ```
 
@@ -929,7 +929,7 @@ import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import type { FileStore } from '@blogmanager/core'
+import type { FileStore } from '@postdeck/core'
 
 const run = promisify(execFile)
 
@@ -987,7 +987,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { expect, test } from 'vitest'
-import { resolveSource, toPost, type BlogConfig } from '@blogmanager/core'
+import { resolveSource, toPost, type BlogConfig } from '@postdeck/core'
 import './index.js'  // side-effect: registers adapters
 import { createLocalFs } from './localfs.js'
 
@@ -1041,7 +1041,7 @@ Expected: FAIL — factory not registered / file missing.
 `packages/adapters/src/markdown.ts`:
 ```ts
 import { basename } from 'node:path'
-import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@blogmanager/core'
+import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@postdeck/core'
 import { parseFrontmatter, patchFrontmatter } from './frontmatter.js'
 
 // Build canonical `fields` from raw frontmatter using the project's fieldMap.
@@ -1099,7 +1099,7 @@ export const markdownFactory: SourceFactory = (cfg, deps) => {
 
 `packages/adapters/src/index.ts`:
 ```ts
-import { registerSource } from '@blogmanager/core'
+import { registerSource } from '@postdeck/core'
 import { markdownFactory } from './markdown.js'
 registerSource('markdown', markdownFactory)
 export * from './frontmatter.js'
@@ -1139,7 +1139,7 @@ import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test } from 'vitest'
-import { resolveSource, type BlogConfig } from '@blogmanager/core'
+import { resolveSource, type BlogConfig } from '@postdeck/core'
 import './index.js'
 import { createLocalFs } from './localfs.js'
 
@@ -1173,7 +1173,7 @@ Expected: FAIL — factory not registered.
 `packages/adapters/src/astro-collection.ts`:
 ```ts
 import { basename } from 'node:path'
-import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@blogmanager/core'
+import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@postdeck/core'
 import { parseFrontmatter, patchFrontmatter } from './frontmatter.js'
 
 function canonicalFields(raw: Record<string, unknown>, fm: FieldMap): Record<string, unknown> {
@@ -1299,7 +1299,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { expect, test } from 'vitest'
-import { resolveSource, toPost, type BlogConfig } from '@blogmanager/core'
+import { resolveSource, toPost, type BlogConfig } from '@postdeck/core'
 import './index.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -1339,7 +1339,7 @@ Expected: FAIL — factory not registered.
 
 `packages/adapters/src/notion.ts`:
 ```ts
-import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@blogmanager/core'
+import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@postdeck/core'
 
 type Prop = any
 const readText = (p: Prop): string => {
@@ -1459,7 +1459,7 @@ import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test } from 'vitest'
-import { defineBlogs, markdownSource } from '@blogmanager/core'
+import { defineBlogs, markdownSource } from '@postdeck/core'
 import { loadPosts, createLocalFs } from './index.js'
 
 test('loadPosts returns normalized posts keyed by project', async () => {
@@ -1487,7 +1487,7 @@ Expected: FAIL — `loadPosts` not exported.
 
 `packages/adapters/src/engine.ts`:
 ```ts
-import { resolveSource, toPost, groupTranslations, type BlogsConfig, type SourceDeps, type Post } from '@blogmanager/core'
+import { resolveSource, toPost, groupTranslations, type BlogsConfig, type SourceDeps, type Post } from '@postdeck/core'
 
 export async function loadPosts(
   config: BlogsConfig,
@@ -1549,5 +1549,5 @@ git add -A && git commit -m "feat(adapters): loadPosts engine (config -> normali
 **Known follow-ups for Plan 2/3 (not gaps in this plan):**
 - Dashboard renders `capabilities` → "예약(빌드 미반영)" badge.
 - `read()` full-body fetch (Notion blocks→markdown; markdown/astro already return body).
-- CLI `npx blogmanager` boot.
+- CLI `npx postdeck` boot.
 - L2 generation + De-AI linter → then `createDraft` (already built).

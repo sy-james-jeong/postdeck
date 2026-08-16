@@ -1,5 +1,5 @@
 import { basename } from 'node:path'
-import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@blogmanager/core'
+import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@postdeck/core'
 import { parseFrontmatter, patchFrontmatter } from './frontmatter.js'
 
 // Build canonical `fields` from raw frontmatter using the project's fieldMap.

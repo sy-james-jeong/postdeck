@@ -1,4 +1,4 @@
-import { registerSource } from '@blogmanager/core'
+import { registerSource } from '@postdeck/core'
 import { markdownFactory } from './markdown.js'
 import { astroCollectionFactory } from './astro-collection.js'
 import { notionFactory } from './notion.js'
