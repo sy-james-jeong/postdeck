@@ -1,5 +1,5 @@
 import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises'
-import { join, dirname } from 'node:path'
+import { dirname, resolve, sep } from 'node:path'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import type { FileStore } from '@blogmanager/core'
@@ -7,7 +7,13 @@ import type { FileStore } from '@blogmanager/core'
 const run = promisify(execFile)
 
 export function createLocalFs(rootDir: string): FileStore {
-  const abs = (p: string) => join(rootDir, p)
+  const abs = (p: string) => {
+    const target = resolve(rootDir, p)
+    if (target !== rootDir && !target.startsWith(rootDir + sep)) {
+      throw new Error(`path escapes root: ${p}`)
+    }
+    return target
+  }
   return {
     async list(dir) {
       try { return await readdir(abs(dir)) } catch { return [] }

@@ -30,10 +30,8 @@ export const markdownFactory: SourceFactory = (cfg, deps) => {
       }
       return out
     },
-    async read(id) {
-      const parsed = parseFrontmatter(await fs.read(`${dir}/${id}.md`))
-      // toPost is applied by the caller in the app layer; return a shell here.
-      return { post: { slug: id } as any, body: parsed.body }
+    async read() {
+      throw new Error('read() is not implemented until L2')
     },
     async createDraft(input: DraftInput): Promise<Ref> {
       // Build a template with a draft marker, then patch mapped keys by their SOURCE names.

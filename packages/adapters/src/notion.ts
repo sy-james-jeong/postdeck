@@ -54,9 +54,8 @@ export const notionFactory: SourceFactory = (cfg, deps) => {
       } while (cursor)
       return out
     },
-    async read(id) {
-      // Body fetch (blocks->markdown) deferred to L2; return empty body shell for now.
-      return { post: { slug: id } as any, body: '' }
+    async read() {
+      throw new Error('read() is not implemented until L2')
     },
     async createDraft(input: DraftInput): Promise<Ref> {
       const props: any = {
