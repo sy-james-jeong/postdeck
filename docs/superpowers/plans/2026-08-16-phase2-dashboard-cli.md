@@ -82,11 +82,13 @@ test('loadProjects returns per-project counts and capabilities', async () => {
   writeFileSync(join(root, 'guides/b.md'), '---\ntitle: B\ndatePublished: "2026-12-01"\ndescription: d\n---\nx', 'utf8')
   const config = defineBlogs([{
     id: 'freelance', name: 'Freelance', liveUrl: 'https://x.com/blog',
-    source: markdownSource({ dir: join(root, 'guides') }),
+    source: markdownSource({ dir: 'guides' }),
     fieldMap: { title: 'title', date: 'datePublished', excerpt: 'description' },
     statusRule: { allPublished: true },
   }])
-  const views = await loadProjects(config, { env: () => undefined, fileStore: createLocalFs('/') }, new Date('2026-08-16'))
+  // NOTE: use createLocalFs(root) with a RELATIVE dir here (same pattern as the
+  // existing loadPosts test). The '/'-root store is introduced in Task 2, not here.
+  const views = await loadProjects(config, { env: () => undefined, fileStore: createLocalFs(root) }, new Date('2026-08-16'))
   expect(views).toHaveLength(1)
   expect(views[0].id).toBe('freelance')
   expect(views[0].name).toBe('Freelance')
