@@ -654,6 +654,17 @@ const nextConfig = {
   transpilePackages: ['@postdeck/core', '@postdeck/adapters'],
   // jiti is used at runtime to load blogs.config.ts; keep it external to the bundle.
   serverExternalPackages: ['jiti'],
+  webpack: (config) => {
+    // We author relative imports with `.js` extensions (NodeNext style, matching
+    // the packages). Next's webpack resolver doesn't map `.js` -> `.ts`/`.tsx`
+    // by default (vite/vitest does, which is why package tests work). This makes
+    // the dashboard app's own `.js` relative imports resolve to their TS sources.
+    config.resolve.extensionAlias = {
+      '.js': ['.ts', '.tsx', '.js'],
+      '.jsx': ['.tsx', '.jsx'],
+    }
+    return config
+  },
 }
 export default nextConfig
 ```
