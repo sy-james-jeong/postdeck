@@ -21,3 +21,12 @@ test('allPublished rule forces published regardless of date', () => {
 test('no date, no draft => published', () => {
   expect(normalizeStatus({ publishDate: null, now })).toBe('published')
 })
+test('draft flag + future date => draft (draft wins over scheduled)', () => {
+  expect(normalizeStatus({ draftValue: true, publishDate: new Date('2026-12-01'), now })).toBe('draft')
+})
+test('allPublished + draft flag => published (allPublished wins)', () => {
+  expect(normalizeStatus({ draftValue: true, publishDate: null, rule: { allPublished: true }, now })).toBe('published')
+})
+test('mixed-case status "Draft" (default rule) => draft', () => {
+  expect(normalizeStatus({ statusValue: 'Draft', publishDate: null, now })).toBe('draft')
+})

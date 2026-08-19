@@ -2,6 +2,7 @@
   "name": "postdeck-monorepo",
   "private": true,
   "type": "module",
+  "engines": { "node": ">=20" },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
