@@ -9,4 +9,5 @@ blogs.config.ts
 # next / build artifacts
 apps/**/.next/
 apps/**/next-env.d.ts
+*.tsbuildinfo
 dist/
