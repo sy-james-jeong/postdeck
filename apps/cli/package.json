@@ -1,0 +1,15 @@
+{
+  "name": "postdeck",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "bin": { "postdeck": "./bin/postdeck.mjs" },
+  "dependencies": {
+    "@postdeck/core": "workspace:*",
+    "@postdeck/adapters": "workspace:*",
+    "@postdeck/dashboard": "workspace:*",
+    "dotenv": "^16.4.0",
+    "jiti": "^2.4.0"
+  }
+}

@@ -21,6 +21,24 @@ importers:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@20.19.43)
 
+  apps/cli:
+    dependencies:
+      '@postdeck/adapters':
+        specifier: workspace:*
+        version: link:../../packages/adapters
+      '@postdeck/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@postdeck/dashboard':
+        specifier: workspace:*
+        version: link:../dashboard
+      dotenv:
+        specifier: ^16.4.0
+        version: 16.6.1
+      jiti:
+        specifier: ^2.4.0
+        version: 2.7.0
+
   apps/dashboard:
     dependencies:
       '@postdeck/adapters':
@@ -616,6 +634,10 @@ packages:
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
+
+  dotenv@16.6.1:
+    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
 
   es-module-lexer@1.7.0:
     resolution: {integrity: sha512-jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==}
@@ -1214,6 +1236,8 @@ snapshots:
 
   detect-libc@2.1.2:
     optional: true
+
+  dotenv@16.6.1: {}
 
   es-module-lexer@1.7.0: {}
 
