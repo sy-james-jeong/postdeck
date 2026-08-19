@@ -1010,7 +1010,7 @@ export function Calendar({ projects }: { projects: ProjectView[] }) {
   return (
     <div className="cal">
       {entries.map((e, i) => (
-        <span key={i} className="entry" title={`${e.project} · ${e.status}`}>
+        <span key={`${e.date}-${e.project}-${e.title}-${i}`} className="entry" title={`${e.project} · ${e.status}`}>
           <span className="d">{e.date}</span> <span className={`dot ${e.status}`} />{e.title}
         </span>
       ))}
