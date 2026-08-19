@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execFileSync } from 'node:child_process'
@@ -32,4 +32,17 @@ test('write rejects a path that escapes rootDir', async () => {
 test('read rejects a path that escapes rootDir', async () => {
   const fs = createLocalFs(root)
   await expect(fs.read('../x')).rejects.toThrow(/escape/i)
+})
+
+test('root store ("/") allows reading an absolute path', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'bm-root-'))
+  writeFileSync(join(dir, 'x.txt'), 'hi', 'utf8')
+  const fs = createLocalFs('/')
+  expect(await fs.list(dir)).toContain('x.txt')
+  expect(await fs.read(join(dir, 'x.txt'))).toBe('hi')
+})
+
+test('list returns [] for a missing dir (ENOENT)', async () => {
+  const fs = createLocalFs('/')
+  expect(await fs.list('/no/such/dir/postdeck-test')).toEqual([])
 })
