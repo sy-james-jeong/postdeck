@@ -82,11 +82,13 @@ test('loadProjects returns per-project counts and capabilities', async () => {
   writeFileSync(join(root, 'guides/b.md'), '---\ntitle: B\ndatePublished: "2026-12-01"\ndescription: d\n---\nx', 'utf8')
   const config = defineBlogs([{
     id: 'freelance', name: 'Freelance', liveUrl: 'https://x.com/blog',
-    source: markdownSource({ dir: join(root, 'guides') }),
+    source: markdownSource({ dir: 'guides' }),
     fieldMap: { title: 'title', date: 'datePublished', excerpt: 'description' },
     statusRule: { allPublished: true },
   }])
-  const views = await loadProjects(config, { env: () => undefined, fileStore: createLocalFs('/') }, new Date('2026-08-16'))
+  // NOTE: use createLocalFs(root) with a RELATIVE dir here (same pattern as the
+  // existing loadPosts test). The '/'-root store is introduced in Task 2, not here.
+  const views = await loadProjects(config, { env: () => undefined, fileStore: createLocalFs(root) }, new Date('2026-08-16'))
   expect(views).toHaveLength(1)
   expect(views[0].id).toBe('freelance')
   expect(views[0].name).toBe('Freelance')
@@ -652,6 +654,17 @@ const nextConfig = {
   transpilePackages: ['@postdeck/core', '@postdeck/adapters'],
   // jiti is used at runtime to load blogs.config.ts; keep it external to the bundle.
   serverExternalPackages: ['jiti'],
+  webpack: (config) => {
+    // We author relative imports with `.js` extensions (NodeNext style, matching
+    // the packages). Next's webpack resolver doesn't map `.js` -> `.ts`/`.tsx`
+    // by default (vite/vitest does, which is why package tests work). This makes
+    // the dashboard app's own `.js` relative imports resolve to their TS sources.
+    config.resolve.extensionAlias = {
+      '.js': ['.ts', '.tsx', '.js'],
+      '.jsx': ['.tsx', '.jsx'],
+    }
+    return config
+  },
 }
 export default nextConfig
 ```
@@ -997,7 +1010,7 @@ export function Calendar({ projects }: { projects: ProjectView[] }) {
   return (
     <div className="cal">
       {entries.map((e, i) => (
-        <span key={i} className="entry" title={`${e.project} · ${e.status}`}>
+        <span key={`${e.date}-${e.project}-${e.title}-${i}`} className="entry" title={`${e.project} · ${e.status}`}>
           <span className="d">{e.date}</span> <span className={`dot ${e.status}`} />{e.title}
         </span>
       ))}
