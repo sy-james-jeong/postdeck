@@ -2,10 +2,11 @@
   "name": "postdeck-monorepo",
   "private": true,
   "type": "module",
+  "engines": { "node": ">=20" },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -p packages/core --noEmit && tsc -p packages/adapters --noEmit"
   },
-  "devDependencies": { "typescript": "^5.6.0", "vitest": "^2.1.0", "@types/node": "^20.0.0" }
+  "devDependencies": { "typescript": "^5.6.0", "vitest": "^2.1.0", "@types/node": "^20.0.0", "@postdeck/core": "workspace:*" }
 }
