@@ -6,6 +6,7 @@ import { expect, test } from 'vitest'
 import { resolveSource, toPost, type BlogConfig } from '@postdeck/core'
 import './index.js'  // side-effect: registers adapters
 import { createLocalFs } from './localfs.js'
+import { markdownFactory } from './markdown.js'
 
 function repo() {
   const root = mkdtempSync(join(tmpdir(), 'bm-md-'))
@@ -38,10 +39,10 @@ test('list maps datePublished->date and description->excerpt', async () => {
   expect(post.raw.order).toBe(2)   // original preserved through RawPost.raw
 })
 
-test('read() throws until L2 implements it', async () => {
+test('read() throws for an unknown slug', async () => {
   const root = repo()
   const src = resolveSource(cfg('guides'), { env: () => undefined, fileStore: createLocalFs(root) })
-  await expect(src.read('anything')).rejects.toThrow(/not implemented/i)
+  await expect(src.read('anything')).rejects.toThrow(/no post with id/i)
 })
 
 test('createDraft writes frontmatter in the project field-map naming', async () => {
@@ -53,4 +54,17 @@ test('createDraft writes frontmatter in the project field-map naming', async () 
   expect(written).toContain('datePublished:')     // uses the mapped key, not "date"
   expect(written).toContain('description: sum')   // uses the mapped key, not "excerpt"
   expect(written).toContain('Hello world')
+})
+
+test('markdown read() returns the post and body for a slug', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'bm-mdread-'))
+  mkdirSync(join(root, 'guides'), { recursive: true })
+  writeFileSync(join(root, 'guides/hello.md'), '---\ntitle: Hello\ndate: "2026-01-01"\ndescription: d\n---\nBody line one.\nBody line two.\n', 'utf8')
+  const src = markdownFactory(
+    { id: 'g', source: { type: 'markdown', dir: 'guides' }, fieldMap: { title: 'title', date: 'date', excerpt: 'description' } } as any,
+    { env: () => undefined, fileStore: createLocalFs(root) },
+  )
+  const { post, body } = await src.read('hello')
+  expect(post.title).toBe('Hello')
+  expect(body).toContain('Body line one.')
 })
