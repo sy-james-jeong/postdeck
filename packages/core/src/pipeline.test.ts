@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
-import { generateDraft, deAiReview } from './index.js'
-import type { LLMClient, GenerateInput } from './index.js'
+import { generateDraft, deAiReview, writeDraft } from './index.js'
+import type { LLMClient, GenerateInput, BlogSource, DraftInput } from './index.js'
 
 const INPUT: GenerateInput = {
   project: 'p',
@@ -38,4 +38,24 @@ test('deAiReview lints, rewrites, and re-lints', async () => {
   expect(report.before.some((f) => f.id === 'overused-connectors')).toBe(true)
   expect(report.after).toEqual([]) // clean rewrite has no findings
   expect(report.rewriteNote).toMatch(/chars/)
+})
+
+test('writeDraft generates, reviews, and saves the REVISED body via createDraft', async () => {
+  const llm = fakeLLM([
+    '{"title":"My Post","excerpt":"E","tags":["a"],"body":"However, raw AI body."}', // generate
+    'Clean human body.', // rewrite
+  ])
+  let saved: DraftInput | undefined
+  const source: BlogSource = {
+    capabilities: { canWrite: true, enforcesFutureDates: false, supportsTranslations: false },
+    list: async () => [],
+    read: async () => { throw new Error('nope') },
+    createDraft: async (input) => { saved = input; return { id: input.slug, path: `x/${input.slug}.md` } },
+  }
+  const { ref, result } = await writeDraft(INPUT, { llm, source })
+  expect(saved?.slug).toBe('my-post')          // slugified title
+  expect(saved?.body).toBe('Clean human body.') // revised, not raw
+  expect(saved?.title).toBe('My Post')
+  expect(ref.path).toBe('x/my-post.md')
+  expect(result.report.before.some((f) => f.id === 'overused-connectors')).toBe(true)
 })
