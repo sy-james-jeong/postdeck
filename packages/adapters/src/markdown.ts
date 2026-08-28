@@ -1,5 +1,6 @@
 import { basename } from 'node:path'
-import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@postdeck/core'
+import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap, PostBody } from '@postdeck/core'
+import { toPost } from '@postdeck/core'
 import { parseFrontmatter, patchFrontmatter } from './frontmatter.js'
 
 // Build canonical `fields` from raw frontmatter using the project's fieldMap.
@@ -30,8 +31,17 @@ export const markdownFactory: SourceFactory = (cfg, deps) => {
       }
       return out
     },
-    async read() {
-      throw new Error('read() is not implemented until L2')
+    async read(id: string): Promise<PostBody> {
+      const files = (await fs.list(dir)).filter((f) => f.endsWith('.md'))
+      for (const f of files) {
+        const parsed = parseFrontmatter(await fs.read(`${dir}/${f}`))
+        const raw = parsed.data
+        const slug = String(raw[fm.slug ?? 'slug'] ?? basename(f, '.md'))
+        if (slug !== id) continue
+        const rawPost: RawPost = { id: slug, slug, fields: canonicalFields(raw, fm), raw }
+        return { post: toPost(rawPost, cfg, new Date()), body: parsed.body }
+      }
+      throw new Error(`markdown read: no post with id "${id}" in ${dir}`)
     },
     async createDraft(input: DraftInput): Promise<Ref> {
       // Build a template with a draft marker, then patch mapped keys by their SOURCE names.

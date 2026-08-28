@@ -1,5 +1,6 @@
 import { basename } from 'node:path'
-import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@postdeck/core'
+import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap, PostBody } from '@postdeck/core'
+import { toPost } from '@postdeck/core'
 import { parseFrontmatter, patchFrontmatter } from './frontmatter.js'
 
 // Build canonical `fields` from raw frontmatter using the project's fieldMap.
@@ -34,8 +35,22 @@ export const astroCollectionFactory: SourceFactory = (cfg, deps) => {
       }
       return out
     },
-    async read() {
-      throw new Error('read() is not implemented until L2')
+    async read(id: string): Promise<PostBody> {
+      const slash = id.indexOf('/')
+      const lang = slash >= 0 ? id.slice(0, slash) : src.langs[0]
+      const slug = slash >= 0 ? id.slice(slash + 1) : id
+      for (const ext of ['.md', '.mdx']) {
+        const path = `${src.dir}/${lang}/${slug}${ext}`
+        try {
+          const parsed = parseFrontmatter(await fs.read(path))
+          const rawPost: RawPost = { id: `${lang}/${slug}`, slug, lang, fields: canonicalFields(parsed.data, fm), raw: parsed.data }
+          return { post: toPost(rawPost, cfg, new Date()), body: parsed.body }
+        } catch (e: any) {
+          if (e?.code === 'ENOENT') continue
+          throw e
+        }
+      }
+      throw new Error(`astro read: no post for id "${id}" (${lang}/${slug}.md|.mdx) in ${src.dir}`)
     },
     async createDraft(input: DraftInput): Promise<Ref> {
       const lang = input.lang ?? src.langs[0]
