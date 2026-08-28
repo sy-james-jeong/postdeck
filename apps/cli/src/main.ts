@@ -5,8 +5,15 @@ import { existsSync } from 'node:fs'
 import { config as loadDotenv } from 'dotenv'
 import { resolveConfigPath, loadBlogsConfig } from '@postdeck/adapters'
 import { parseArgs } from './args.js'
+import { runWrite } from './write.js'
 
 export async function main(): Promise<void> {
+  const argv0 = process.argv.slice(2)
+  if (argv0[0] === 'write') {
+    await runWrite(argv0.slice(1))
+    return
+  }
+
   const args = parseArgs(process.argv.slice(2))
   const cwd = process.cwd()
 

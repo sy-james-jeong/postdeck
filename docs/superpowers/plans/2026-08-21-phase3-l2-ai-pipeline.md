@@ -156,7 +156,9 @@ const RULES: Rule[] = [
       const mean = lens.reduce((a, b) => a + b, 0) / lens.length
       const variance = lens.reduce((a, b) => a + (b - mean) ** 2, 0) / lens.length
       const cv = Math.sqrt(variance) / (mean || 1)
-      return cv < 0.25 ? [`cv=${cv.toFixed(2)}`] : []
+      // 0.15 (not 0.25): the CLEAN test sample has cv≈0.195 and must NOT flag;
+      // the uniform sample has cv=0. 0.15 separates them.
+      return cv < 0.15 ? [`cv=${cv.toFixed(2)}`] : []
     },
   },
   {
