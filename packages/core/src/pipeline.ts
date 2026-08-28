@@ -1,6 +1,9 @@
 import type { LLMClient } from './llm.js'
 import { buildGeneratePrompt, buildRewritePrompt } from './prompts.js'
 import { deAiLint, type LintFinding } from './deai.js'
+import type { BlogSource } from './source.js'
+import type { Ref } from './post.js'
+import { slugify } from './slug.js'
 
 export interface ToneContext {
   projectName: string
@@ -63,4 +66,27 @@ export async function deAiReview(body: string, llm: LLMClient): Promise<{ body: 
     body: rewritten,
     report: { before, after, rewriteNote: `rewrote ${body.length}→${rewritten.length} chars` },
   }
+}
+
+export interface WriteResult {
+  draft: Draft
+  report: ReviewReport
+}
+
+export async function writeDraft(
+  input: GenerateInput,
+  deps: { llm: LLMClient; source: BlogSource },
+): Promise<{ ref: Ref; result: WriteResult }> {
+  const generated = await generateDraft(input, deps.llm)
+  const reviewed = await deAiReview(generated.body, deps.llm)
+  const draft: Draft = { ...generated, body: reviewed.body }
+  const ref = await deps.source.createDraft({
+    slug: slugify(draft.title),
+    title: draft.title,
+    excerpt: draft.excerpt,
+    tags: draft.tags,
+    body: draft.body,
+    lang: input.lang,
+  })
+  return { ref, result: { draft, report: reviewed.report } }
 }
