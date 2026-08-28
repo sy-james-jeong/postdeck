@@ -1,5 +1,6 @@
 import type { LLMClient } from './llm.js'
-import { buildGeneratePrompt } from './prompts.js'
+import { buildGeneratePrompt, buildRewritePrompt } from './prompts.js'
+import { deAiLint, type LintFinding } from './deai.js'
 
 export interface ToneContext {
   projectName: string
@@ -45,4 +46,21 @@ export async function generateDraft(input: GenerateInput, llm: LLMClient): Promi
   const { system, prompt } = buildGeneratePrompt(input)
   const text = await llm.complete({ system, prompt })
   return parseDraftJson(text)
+}
+
+export interface ReviewReport {
+  before: LintFinding[]
+  after: LintFinding[]
+  rewriteNote: string
+}
+
+export async function deAiReview(body: string, llm: LLMClient): Promise<{ body: string; report: ReviewReport }> {
+  const before = deAiLint(body)
+  const { system, prompt } = buildRewritePrompt(body, before)
+  const rewritten = (await llm.complete({ system, prompt })).trim()
+  const after = deAiLint(rewritten)
+  return {
+    body: rewritten,
+    report: { before, after, rewriteNote: `rewrote ${body.length}→${rewritten.length} chars` },
+  }
 }
