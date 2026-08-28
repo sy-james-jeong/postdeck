@@ -3,6 +3,11 @@ import { config as loadDotenv } from 'dotenv'
 import { resolveSource, generateDraft, deAiReview, writeDraft, type GenerateInput, type Draft, type ReviewReport } from '@postdeck/core'
 import { resolveConfigPath, loadBlogsConfig, createLocalFs, gatherToneContext, createAnthropicLLM } from '@postdeck/adapters'
 
+export function isMissingCredentialError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err)
+  return /could not resolve authentication|authentication_error|x-api-key|api[\s_-]?key/i.test(msg)
+}
+
 export interface WriteArgs {
   project?: string
   topic?: string
@@ -63,15 +68,23 @@ export async function runWrite(argv: string[]): Promise<void> {
   const toneContext = await gatherToneContext(source, cfg)
   const input: GenerateInput = { project: cfg.id, topic: args.topic, toneContext, lang: args.lang }
 
-  if (args.dryRun) {
-    const draft = await generateDraft(input, llm)
-    const reviewed = await deAiReview(draft.body, llm)
-    printDraftAndReport({ ...draft, body: reviewed.body }, reviewed.report)
-    console.log('\n(dry-run: not saved)')
-    return
-  }
+  try {
+    if (args.dryRun) {
+      const draft = await generateDraft(input, llm)
+      const reviewed = await deAiReview(draft.body, llm)
+      printDraftAndReport({ ...draft, body: reviewed.body }, reviewed.report)
+      console.log('\n(dry-run: not saved)')
+      return
+    }
 
-  const { ref, result } = await writeDraft(input, { llm, source })
-  printDraftAndReport(result.draft, result.report)
-  console.log(`\nsaved draft: ${ref.path ?? ref.url ?? ref.id}`)
+    const { ref, result } = await writeDraft(input, { llm, source })
+    printDraftAndReport(result.draft, result.report)
+    console.log(`\nsaved draft: ${ref.path ?? ref.url ?? ref.id}`)
+  } catch (err) {
+    if (isMissingCredentialError(err)) {
+      console.error('postdeck write: no Anthropic credentials. Set ANTHROPIC_API_KEY in .env or run `ant auth login`.')
+      process.exit(1)
+    }
+    throw err
+  }
 }

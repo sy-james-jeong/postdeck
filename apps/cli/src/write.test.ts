@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { parseWriteArgs } from './write.js'
+import { parseWriteArgs, isMissingCredentialError } from './write.js'
 
 test('parseWriteArgs reads project/topic/lang/config and dry-run', () => {
   expect(parseWriteArgs(['--project', 'hongix', '--topic', 'Pricing work', '--lang', 'en', '--dry-run'])).toEqual({
@@ -11,4 +11,8 @@ test('parseWriteArgs defaults dryRun to false and fields to undefined', () => {
 })
 test('parseWriteArgs captures --config', () => {
   expect(parseWriteArgs(['--config', 'custom.ts']).config).toBe('custom.ts')
+})
+test('isMissingCredentialError detects SDK auth errors, ignores others', () => {
+  expect(isMissingCredentialError(new Error('Could not resolve authentication method. Expected one of apiKey...'))).toBe(true)
+  expect(isMissingCredentialError(new Error('network timeout'))).toBe(false)
 })
