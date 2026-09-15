@@ -16,3 +16,6 @@ test('isMissingCredentialError detects SDK auth errors, ignores others', () => {
   expect(isMissingCredentialError(new Error('Could not resolve authentication method. Expected one of apiKey...'))).toBe(true)
   expect(isMissingCredentialError(new Error('network timeout'))).toBe(false)
 })
+test('isMissingCredentialError detects a Gemini-style key error', () => {
+  expect(isMissingCredentialError(new Error('API key not valid. Please pass a valid API key.'))).toBe(true)
+})
