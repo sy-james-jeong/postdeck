@@ -5,7 +5,7 @@ import { resolveConfigPath, loadBlogsConfig, createLocalFs, gatherToneContext, s
 
 export function isMissingCredentialError(err: unknown): boolean {
   const msg = err instanceof Error ? err.message : String(err)
-  return /could not resolve authentication|authentication_error|x-api-key|api[\s_-]?key|credential/i.test(msg)
+  return /could not resolve authentication|authentication_error|x-api-key|api[\s_-]?key/i.test(msg)
 }
 
 export interface WriteArgs {
