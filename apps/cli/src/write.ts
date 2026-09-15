@@ -1,11 +1,11 @@
 import { resolve } from 'node:path'
 import { config as loadDotenv } from 'dotenv'
 import { resolveSource, generateDraft, deAiReview, writeDraft, type GenerateInput, type Draft, type ReviewReport } from '@postdeck/core'
-import { resolveConfigPath, loadBlogsConfig, createLocalFs, gatherToneContext, createAnthropicLLM } from '@postdeck/adapters'
+import { resolveConfigPath, loadBlogsConfig, createLocalFs, gatherToneContext, selectLLM } from '@postdeck/adapters'
 
 export function isMissingCredentialError(err: unknown): boolean {
   const msg = err instanceof Error ? err.message : String(err)
-  return /could not resolve authentication|authentication_error|x-api-key|api[\s_-]?key/i.test(msg)
+  return /could not resolve authentication|authentication_error|x-api-key|api[\s_-]?key|credential/i.test(msg)
 }
 
 export interface WriteArgs {
@@ -61,7 +61,7 @@ export async function runWrite(argv: string[]): Promise<void> {
     process.exit(1)
   }
 
-  const llm = createAnthropicLLM({ env: (n) => process.env[n] })
+  const llm = selectLLM({ env: (n) => process.env[n] })
   const deps = { fileStore: createLocalFs('/'), env: (n: string) => process.env[n], fetchImpl: fetch, llm }
   const source = resolveSource(cfg, deps)
 
@@ -82,7 +82,10 @@ export async function runWrite(argv: string[]): Promise<void> {
     console.log(`\nsaved draft: ${ref.path ?? ref.url ?? ref.id}`)
   } catch (err) {
     if (isMissingCredentialError(err)) {
-      console.error('postdeck write: no Anthropic credentials. Set ANTHROPIC_API_KEY in .env or run `ant auth login`.')
+      console.error(
+        'postdeck write: no LLM credentials. Set GEMINI_API_KEY (default provider) or ANTHROPIC_API_KEY in .env — ' +
+          'or set POSTDECK_LLM to pick a provider.',
+      )
       process.exit(1)
     }
     throw err
