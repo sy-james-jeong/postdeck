@@ -25,8 +25,18 @@ export interface Draft {
 }
 
 function parseDraftJson(text: string): Draft {
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/)
-  const raw = (fenced ? fenced[1] : text).trim()
+  let raw = text.trim()
+  // Unwrap a ```json … ``` fence ONLY when it wraps the whole response. Anchoring
+  // to start/end (rather than a non-greedy inner match) means a code fence inside
+  // the JSON body does not truncate the captured JSON.
+  const fence = raw.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/)
+  if (fence) raw = fence[1].trim()
+  // Fallback for leading/trailing prose: slice the outermost {...} object.
+  if (!raw.startsWith('{')) {
+    const first = raw.indexOf('{')
+    const last = raw.lastIndexOf('}')
+    if (first !== -1 && last > first) raw = raw.slice(first, last + 1)
+  }
   let obj: unknown
   try {
     obj = JSON.parse(raw)
