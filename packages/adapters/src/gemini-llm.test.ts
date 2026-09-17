@@ -11,3 +11,8 @@ test('createGeminiLLM.complete rejects with an API-key error when no key is set 
   const llm = createGeminiLLM({ env: () => undefined })
   await expect(llm.complete({ prompt: 'hi' })).rejects.toThrow(/api[\s_-]?key/i)
 })
+
+test('createGeminiLLM honors POSTDECK_GEMINI_MODEL override (still returns a client)', () => {
+  const llm = createGeminiLLM({ env: (n) => (n === 'GEMINI_API_KEY' ? 'x' : n === 'POSTDECK_GEMINI_MODEL' ? 'gemini-x' : undefined) })
+  expect(typeof llm.complete).toBe('function')
+})

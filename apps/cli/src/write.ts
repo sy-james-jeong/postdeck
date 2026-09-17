@@ -88,6 +88,9 @@ export async function runWrite(argv: string[]): Promise<void> {
       )
       process.exit(1)
     }
-    throw err
+    // Any other provider/API error (quota, model-not-found, network): show the
+    // real message on one line instead of a raw stack trace.
+    console.error(`postdeck write: generation failed — ${err instanceof Error ? err.message : String(err)}`)
+    process.exit(1)
   }
 }
