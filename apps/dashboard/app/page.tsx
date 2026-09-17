@@ -10,6 +10,7 @@ export default async function Page() {
   return (
     <main>
       <h1>PostDeck</h1>
+      <p><a href="/write">✍ Write a post</a></p>
       <h2>프로젝트</h2>
       <div className="cards">
         {projects.map((p) => <ProjectCard key={p.id} project={p} />)}
