@@ -1,4 +1,6 @@
-import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap } from '@postdeck/core'
+import type { SourceFactory, BlogSource, RawPost, DraftInput, Ref, FieldMap, PostBody } from '@postdeck/core'
+import { toPost } from '@postdeck/core'
+import { blocksToMarkdown } from './notion-blocks.js'
 
 type Prop = any
 const readText = (p: Prop): string => {
@@ -54,8 +56,24 @@ export const notionFactory: SourceFactory = (cfg, deps) => {
       } while (cursor)
       return out
     },
-    async read() {
-      throw new Error('read() is not implemented until L2')
+    async read(id: string): Promise<PostBody> {
+      const pageRes = await doFetch(`https://api.notion.com/v1/pages/${id}`, { headers: H })
+      const page: any = await pageRes.json()
+      if (page.object === 'error') throw new Error(`Notion ${page.status} ${page.code}: ${page.message}`)
+      const blocks: any[] = []
+      let cursor: string | undefined
+      do {
+        const url = `https://api.notion.com/v1/blocks/${id}/children` + (cursor ? `?start_cursor=${cursor}` : '')
+        const res = await doFetch(url, { headers: H })
+        const j: any = await res.json()
+        if (j.object === 'error') throw new Error(`Notion ${j.status} ${j.code}: ${j.message}`)
+        blocks.push(...(j.results ?? []))
+        cursor = j.has_more ? j.next_cursor : undefined
+      } while (cursor)
+      const props = page.properties
+      const slug = readText(props[fm.slug ?? 'Slug']) || page.id
+      const rawPost: RawPost = { id: page.id, slug, fields: canonicalFields(props, fm), raw: props }
+      return { post: toPost(rawPost, cfg, new Date()), body: blocksToMarkdown(blocks) }
     },
     async createDraft(input: DraftInput): Promise<Ref> {
       const props: any = {
