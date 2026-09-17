@@ -18,7 +18,7 @@ export function createGeminiLLM(deps: { env: (n: string) => string | undefined }
       if (!apiKey) throw new Error('Gemini: GEMINI_API_KEY (or GOOGLE_API_KEY) is not set')
       const ai = new GoogleGenAI({ apiKey })
       const contents = req.system ? `${req.system}\n\n${req.prompt}` : req.prompt
-      const res = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents })
+      const res = await ai.models.generateContent({ model: 'gemini-3.6-flash', contents })
       return res.text ?? ''
     },
   }
