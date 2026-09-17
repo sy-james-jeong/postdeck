@@ -1,0 +1,29 @@
+'use server'
+
+import type { Draft, Ref } from '@postdeck/core'
+import { generateForProject, saveDraftForProject, type GenerateResult } from '../../lib/write.js'
+
+const msg = (e: unknown) => (e instanceof Error ? e.message : String(e))
+
+export async function generateAction(
+  input: { projectId: string; topic: string; lang?: string },
+): Promise<{ ok: true; result: GenerateResult } | { ok: false; error: string }> {
+  try {
+    if (!input.projectId || !input.topic) return { ok: false, error: 'project and topic are required' }
+    const result = await generateForProject(input.projectId, input.topic, input.lang || undefined)
+    return { ok: true, result }
+  } catch (e) {
+    return { ok: false, error: msg(e) }
+  }
+}
+
+export async function saveAction(
+  input: { projectId: string; draft: Draft; lang?: string },
+): Promise<{ ok: true; ref: Ref } | { ok: false; error: string }> {
+  try {
+    const ref = await saveDraftForProject(input.projectId, input.draft, input.lang || undefined)
+    return { ok: true, ref }
+  } catch (e) {
+    return { ok: false, error: msg(e) }
+  }
+}
