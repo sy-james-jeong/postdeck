@@ -59,3 +59,11 @@ test('writeDraft generates, reviews, and saves the REVISED body via createDraft'
   expect(ref.path).toBe('x/my-post.md')
   expect(result.report.before.some((f) => f.id === 'overused-connectors')).toBe(true)
 })
+
+test('generateDraft parses JSON whose body itself contains a markdown code fence', async () => {
+  const body = 'Intro.\n```js\nconst x = 1\n```\nOutro.'
+  const json = JSON.stringify({ title: 'T', excerpt: 'E', tags: [], body })
+  const llm = fakeLLM(['```json\n' + json + '\n```'])
+  const d = await generateDraft(INPUT, llm)
+  expect(d.body).toBe(body)
+})
