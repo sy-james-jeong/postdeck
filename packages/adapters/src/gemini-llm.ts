@@ -13,12 +13,15 @@ import type { LLMClient, LLMRequest } from '@postdeck/core'
 // field, to avoid depending on SDK-version-specific request shapes.
 export function createGeminiLLM(deps: { env: (n: string) => string | undefined }): LLMClient {
   const apiKey = deps.env('GEMINI_API_KEY') ?? deps.env('GOOGLE_API_KEY')
+  // Google rotates Flash model ids fairly often (gemini-2.5-flash already 404s for
+  // new API users). Allow an env override so a model change needs no code edit.
+  const model = deps.env('POSTDECK_GEMINI_MODEL') ?? 'gemini-3.6-flash'
   return {
     async complete(req: LLMRequest): Promise<string> {
       if (!apiKey) throw new Error('Gemini: GEMINI_API_KEY (or GOOGLE_API_KEY) is not set')
       const ai = new GoogleGenAI({ apiKey })
       const contents = req.system ? `${req.system}\n\n${req.prompt}` : req.prompt
-      const res = await ai.models.generateContent({ model: 'gemini-3.6-flash', contents })
+      const res = await ai.models.generateContent({ model, contents })
       return res.text ?? ''
     },
   }
