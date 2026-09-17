@@ -25,3 +25,16 @@ th { color:var(--dim); font-size:12px; }
 .cal { display:flex; flex-wrap:wrap; gap:6px; }
 .cal .entry { background:var(--card); border:1px solid var(--line); border-radius:6px; padding:4px 8px; font-size:12px; }
 .cal .entry .d { color:var(--dim); }
+
+.writeform { display:flex; flex-direction:column; gap:10px; max-width:640px; margin:12px 0; }
+.writeform label { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--dim); }
+.writeform select, .writeform input, .writeform textarea {
+  background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:8px; font:inherit; }
+.writeform button, .result button {
+  align-self:flex-start; background:var(--pub); color:#04210b; border:0; border-radius:6px;
+  padding:8px 14px; font-weight:600; cursor:pointer; }
+.writeform button:disabled, .result button:disabled { opacity:.5; cursor:default; }
+.result { margin-top:20px; border-top:1px solid var(--line); padding-top:16px; }
+.result pre { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px; white-space:pre-wrap; overflow-x:auto; }
+.ok { color:var(--pub); }
+.dim { color:var(--dim); font-size:13px; }
