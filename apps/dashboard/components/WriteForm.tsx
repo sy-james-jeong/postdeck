@@ -14,6 +14,14 @@ export function WriteForm({ projects }: { projects: WritableProject[] }) {
   const [saved, setSaved] = useState('')
   const [pending, start] = useTransition()
 
+  const langs = projects.find((p) => p.id === projectId)?.langs ?? []
+
+  // Switching project resets the language (its options differ per project).
+  const onProject = (id: string) => {
+    setProjectId(id)
+    setLang('')
+  }
+
   const onGenerate = () => {
     setError(''); setSaved(''); setResult(null)
     start(async () => {
@@ -37,13 +45,18 @@ export function WriteForm({ projects }: { projects: WritableProject[] }) {
     <div>
       <div className="writeform">
         <label>Project{' '}
-          <select value={projectId} onChange={(e) => setProjectId(e.target.value)}>
+          <select value={projectId} onChange={(e) => onProject(e.target.value)}>
             {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </label>
-        <label>Language{' '}
-          <input value={lang} onChange={(e) => setLang(e.target.value)} placeholder="optional, e.g. en" />
-        </label>
+        {langs.length > 0 && (
+          <label>Language{' '}
+            <select value={lang} onChange={(e) => setLang(e.target.value)}>
+              <option value="">default ({langs[0]})</option>
+              {langs.map((l) => <option key={l} value={l}>{l}</option>)}
+            </select>
+          </label>
+        )}
         <label>Topic
           <textarea value={topic} onChange={(e) => setTopic(e.target.value)} rows={3} />
         </label>
