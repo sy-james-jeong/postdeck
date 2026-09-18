@@ -34,6 +34,8 @@ export const blogConfigSchema = z.object({
   fieldMap: fieldMapSchema,
   statusRule: statusRuleSchema,
   groupTranslationsBy: z.enum(['slug']).optional(),
+  publishStatus: z.string().optional(),
+  repoDir: z.string().optional(),
 })
 export type BlogConfig = z.infer<typeof blogConfigSchema>
 

@@ -75,6 +75,9 @@ export const notionFactory: SourceFactory = (cfg, deps) => {
       const rawPost: RawPost = { id: page.id, slug, fields: canonicalFields(props, fm), raw: props }
       return { post: toPost(rawPost, cfg, new Date()), body: blocksToMarkdown(blocks) }
     },
+    async publish(): Promise<Ref> {
+      throw new Error('publish() not implemented')
+    },
     async createDraft(input: DraftInput): Promise<Ref> {
       const props: any = {
         [fm.title]: { title: [{ text: { content: input.title } }] },
