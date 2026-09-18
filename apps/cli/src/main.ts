@@ -8,6 +8,7 @@ import { parseArgs } from './args.js'
 import { runWrite } from './write.js'
 import { runPublish } from './publish.js'
 import { runUnpublish } from './unpublish.js'
+import { runScheduled } from './run-scheduled.js'
 
 export async function main(): Promise<void> {
   const argv0 = process.argv.slice(2)
@@ -21,6 +22,10 @@ export async function main(): Promise<void> {
   }
   if (argv0[0] === 'unpublish') {
     await runUnpublish(argv0.slice(1))
+    return
+  }
+  if (argv0[0] === 'run-scheduled') {
+    await runScheduled(argv0.slice(1))
     return
   }
 
