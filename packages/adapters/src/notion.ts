@@ -75,8 +75,15 @@ export const notionFactory: SourceFactory = (cfg, deps) => {
       const rawPost: RawPost = { id: page.id, slug, fields: canonicalFields(props, fm), raw: props }
       return { post: toPost(rawPost, cfg, new Date()), body: blocksToMarkdown(blocks) }
     },
-    async publish(): Promise<Ref> {
-      throw new Error('publish() not implemented')
+    async publish(id: string): Promise<Ref> {
+      if (!fm.status) throw new Error('notion publish: fieldMap.status is required to publish')
+      const res = await doFetch(`https://api.notion.com/v1/pages/${id}`, {
+        method: 'PATCH', headers: H,
+        body: JSON.stringify({ properties: { [fm.status]: { status: { name: cfg.publishStatus ?? 'Published' } } } }),
+      })
+      const j: any = await res.json()
+      if (j.object === 'error') throw new Error(`Notion ${j.status} ${j.code}: ${j.message}`)
+      return { id: j.id, url: j.url }
     },
     async createDraft(input: DraftInput): Promise<Ref> {
       const props: any = {
