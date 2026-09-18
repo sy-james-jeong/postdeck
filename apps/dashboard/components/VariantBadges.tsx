@@ -7,8 +7,8 @@ export function VariantBadges({ variants }: { variants?: PostVariant[] }) {
     <span>
       {variants.map((v) => (
         <span key={v.lang} className={`badge ${variantBadgeClass(v.present)}`} style={{ marginRight: 4 }}
-          title={v.present ? `${v.lang}: ${v.status}` : `${v.lang}: 누락`}>
-          {v.lang}{v.present ? '' : '·누락'}
+          title={v.present ? `${v.lang}: ${v.status}` : `${v.lang}: 미번역`}>
+          {v.lang}{v.present ? '' : '·미번역'}
         </span>
       ))}
     </span>
