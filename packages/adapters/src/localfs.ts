@@ -24,11 +24,15 @@ export function createLocalFs(rootDir: string): FileStore {
       return readFile(abs(path), 'utf8')
     },
     async write(path, content, { message }) {
-      await mkdir(dirname(abs(path)), { recursive: true })
-      await writeFile(abs(path), content, 'utf8')
-      await run('git', ['add', path], { cwd: rootDir })
+      const target = abs(path)
+      const cwd = dirname(target)
+      await mkdir(cwd, { recursive: true })
+      await writeFile(target, content, 'utf8')
+      // Run git from the file's own directory so it discovers whichever repo the
+      // file lives in — rootDir may be "/" (root store), which is not a repo.
+      await run('git', ['add', target], { cwd })
       // commit; ignore "nothing to commit" when content is identical.
-      try { await run('git', ['commit', '-m', message, '--', path], { cwd: rootDir }) }
+      try { await run('git', ['commit', '-m', message, '--', target], { cwd }) }
       catch (e: any) { if (!/nothing to commit/i.test(e.stdout ?? e.message ?? '')) throw e }
     },
   }
