@@ -1,7 +1,7 @@
 'use server'
 
 import type { Draft, Ref } from '@postdeck/core'
-import { generateForProject, saveDraftForProject, publishPost, unpublishPost, type GenerateResult } from '../../lib/write.js'
+import { generateForProject, saveDraftForProject, publishPost, unpublishPost, publishManyPost, type GenerateResult, type BulkResult } from '../../lib/write.js'
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
@@ -45,6 +45,18 @@ export async function unpublishAction(
   try {
     const ref = await unpublishPost(input.projectId, input.postId)
     return { ok: true, ref }
+  } catch (e) {
+    return { ok: false, error: msg(e) }
+  }
+}
+
+export async function publishManyAction(
+  input: { projectId: string; postIds: string[] },
+): Promise<{ ok: true; results: BulkResult[] } | { ok: false; error: string }> {
+  try {
+    if (!input.postIds?.length) return { ok: false, error: 'no posts selected' }
+    const results = await publishManyPost(input.projectId, input.postIds)
+    return { ok: true, results }
   } catch (e) {
     return { ok: false, error: msg(e) }
   }
