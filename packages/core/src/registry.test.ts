@@ -13,6 +13,7 @@ test('resolveSource dispatches on source.type', () => {
   const fake: BlogSource = {
     capabilities: { canWrite: true, enforcesFutureDates: false, supportsTranslations: false },
     list: async () => [], read: async () => ({ post: {} as any, body: '' }),
+    publish: async () => ({ id: 'stub' }),
     createDraft: async () => ({ id: 'r' }),
   }
   registerSource('markdown', () => fake)

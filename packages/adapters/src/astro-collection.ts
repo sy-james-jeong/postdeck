@@ -52,6 +52,9 @@ export const astroCollectionFactory: SourceFactory = (cfg, deps) => {
       }
       throw new Error(`astro read: no post for id "${id}" (${lang}/${slug}.md|.mdx) in ${src.dir}`)
     },
+    async publish(): Promise<Ref> {
+      throw new Error('publish() not implemented')
+    },
     async createDraft(input: DraftInput): Promise<Ref> {
       const lang = input.lang ?? src.langs[0]
       const template = `---\n${fm.draft ?? 'draft'}: true\n---\n\n${input.body}\n`
