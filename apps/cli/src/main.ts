@@ -7,6 +7,7 @@ import { resolveConfigPath, loadBlogsConfig } from '@postdeck/adapters'
 import { parseArgs } from './args.js'
 import { runWrite } from './write.js'
 import { runPublish } from './publish.js'
+import { runUnpublish } from './unpublish.js'
 
 export async function main(): Promise<void> {
   const argv0 = process.argv.slice(2)
@@ -16,6 +17,10 @@ export async function main(): Promise<void> {
   }
   if (argv0[0] === 'publish') {
     await runPublish(argv0.slice(1))
+    return
+  }
+  if (argv0[0] === 'unpublish') {
+    await runUnpublish(argv0.slice(1))
     return
   }
 
