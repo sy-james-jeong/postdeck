@@ -1,6 +1,7 @@
-import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { execFileSync } from 'node:child_process'
 import { expect, test } from 'vitest'
 import { resolveSource, type BlogConfig } from '@postdeck/core'
 import './index.js'
@@ -37,4 +38,23 @@ test('astro read() returns post + body for lang/slug (.md and .mdx)', async () =
   )
   expect((await src.read('en/post-a')).body).toContain('Alpha body.')
   expect((await src.read('en/post-b')).body).toContain('Beta body.')
+})
+
+test('astro publish() sets draft:false, preserves other frontmatter', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'bm-astropub-'))
+  execFileSync('git', ['init', '-q'], { cwd: root })
+  execFileSync('git', ['config', 'user.email', 't@t.co'], { cwd: root })
+  execFileSync('git', ['config', 'user.name', 't'], { cwd: root })
+  mkdirSync(join(root, 'blog/en'), { recursive: true })
+  writeFileSync(join(root, 'blog/en/d.md'), '---\ntitle: D\ndraft: true\ntool: merge\n---\nHi.\n', 'utf8')
+  execFileSync('git', ['add', '.'], { cwd: root })
+  execFileSync('git', ['commit', '-qm', 'initial'], { cwd: root })
+  const src = astroCollectionFactory(
+    { id: 'r', source: { type: 'astro-collection', dir: 'blog', langs: ['en'] }, fieldMap: { title: 'title', date: 'date', excerpt: 'description', draft: 'draft' } } as any,
+    { env: () => undefined, fileStore: createLocalFs(root) },
+  )
+  await src.publish('en/d')
+  const after = readFileSync(join(root, 'blog/en/d.md'), 'utf8')
+  expect(after).toMatch(/draft: false/)
+  expect(after).toContain('tool: merge')
 })

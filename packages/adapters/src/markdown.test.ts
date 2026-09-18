@@ -68,3 +68,24 @@ test('markdown read() returns the post and body for a slug', async () => {
   expect(post.title).toBe('Hello')
   expect(body).toContain('Body line one.')
 })
+
+test('markdown publish() flips the status field and preserves other frontmatter + body', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'bm-mdpub-'))
+  execFileSync('git', ['init', '-q'], { cwd: root })
+  execFileSync('git', ['config', 'user.email', 't@t.co'], { cwd: root })
+  execFileSync('git', ['config', 'user.name', 't'], { cwd: root })
+  mkdirSync(join(root, 'guides'), { recursive: true })
+  writeFileSync(join(root, 'guides/p.md'), '---\ntitle: P\nstatus: draft\norder: 4\n---\nBody stays.\n', 'utf8')
+  execFileSync('git', ['add', '.'], { cwd: root })
+  execFileSync('git', ['commit', '-qm', 'initial'], { cwd: root })
+  const src = markdownFactory(
+    { id: 'g', source: { type: 'markdown', dir: 'guides' }, fieldMap: { title: 'title', date: 'date', excerpt: 'description', status: 'status' } } as any,
+    { env: () => undefined, fileStore: createLocalFs(root) },
+  )
+  const ref = await src.publish('p')
+  expect(ref.id).toBe('p')
+  const after = readFileSync(join(root, 'guides/p.md'), 'utf8')
+  expect(after).toContain('status: published')
+  expect(after).toContain('order: 4')      // custom field preserved
+  expect(after).toContain('Body stays.')   // body preserved
+})
