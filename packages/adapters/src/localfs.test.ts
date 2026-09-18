@@ -46,3 +46,23 @@ test('list returns [] for a missing dir (ENOENT)', async () => {
   const fs = createLocalFs('/')
   expect(await fs.list('/no/such/dir/postdeck-test')).toEqual([])
 })
+
+// Regression: production (CLI + dashboard) uses createLocalFs('/') and writes an
+// ABSOLUTE path into a blog repo. git must be run from the file's directory (not
+// rootDir '/'), else `git add` fails with "not a git repository". Prior tests only
+// exercised createLocalFs(root), so this path was uncovered.
+test('root store ("/") commits an absolute path inside its own git repo', async () => {
+  const repo = mkdtempSync(join(tmpdir(), 'bm-rootrepo-'))
+  execFileSync('git', ['init', '-q'], { cwd: repo })
+  execFileSync('git', ['config', 'user.email', 't@t.co'], { cwd: repo })
+  execFileSync('git', ['config', 'user.name', 't'], { cwd: repo })
+  const fs = createLocalFs('/')
+  const abs = join(repo, 'guides', 'post.md')
+  await fs.write(abs, 'published body', { message: 'blog: publish post' })
+  expect(readFileSync(abs, 'utf8')).toBe('published body')
+  const log = execFileSync('git', ['log', '--oneline'], { cwd: repo }).toString()
+  expect(log).toContain('blog: publish post')
+  // clean working tree: the write was actually committed, not left dangling.
+  const status = execFileSync('git', ['status', '--short'], { cwd: repo }).toString()
+  expect(status).toBe('')
+})
