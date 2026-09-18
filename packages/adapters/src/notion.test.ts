@@ -57,3 +57,19 @@ test('notion read() returns post + markdown body (paginated blocks)', async () =
   expect(body).toContain('# Intro')
   expect(body).toContain('Body text.')
 })
+
+test('notion publish() PATCHes the Status property to published', async () => {
+  let captured: any
+  const fetchImpl = (async (url: string, opts: any) => {
+    captured = { url, body: JSON.parse(opts.body) }
+    return { json: async () => ({ object: 'page', id: 'p1', url: 'https://notion.so/p1' }) } as any
+  }) as unknown as typeof fetch
+  const src = notionFactory(
+    { id: 'h', source: { type: 'notion', databaseId: 'db', tokenRef: 'T' }, fieldMap: { title: 'Title', date: 'Date', excerpt: 'Excerpt', status: 'Status', slug: 'Slug' } } as any,
+    { env: (n) => (n === 'T' ? 'tok' : undefined), fetchImpl },
+  )
+  const ref = await src.publish('p1')
+  expect(captured.url).toContain('/v1/pages/p1')
+  expect(captured.body.properties.Status.status.name).toBe('Published')
+  expect(ref).toEqual({ id: 'p1', url: 'https://notion.so/p1' })
+})

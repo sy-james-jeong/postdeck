@@ -14,7 +14,7 @@ export interface BlogSource {
   list(): Promise<RawPost[]>
   read(id: string): Promise<PostBody>
   createDraft(input: DraftInput): Promise<Ref>
-  // publish(id: string): Promise<void>   // L3
+  publish(id: string): Promise<Ref>
 }
 
 export interface SourceDeps {
