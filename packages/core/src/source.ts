@@ -15,6 +15,7 @@ export interface BlogSource {
   read(id: string): Promise<PostBody>
   createDraft(input: DraftInput): Promise<Ref>
   publish(id: string): Promise<Ref>
+  unpublish(id: string): Promise<Ref>
 }
 
 export interface SourceDeps {

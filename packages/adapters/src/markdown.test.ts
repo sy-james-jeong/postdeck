@@ -89,3 +89,26 @@ test('markdown publish() flips the status field and preserves other frontmatter 
   expect(after).toContain('order: 4')      // custom field preserved
   expect(after).toContain('Body stays.')   // body preserved
 })
+
+test('markdown unpublish() flips status to the draft value and round-trips as draft', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'bm-mdunpub-'))
+  execFileSync('git', ['init', '-q'], { cwd: root })
+  execFileSync('git', ['config', 'user.email', 't@t.co'], { cwd: root })
+  execFileSync('git', ['config', 'user.name', 't'], { cwd: root })
+  mkdirSync(join(root, 'guides'), { recursive: true })
+  writeFileSync(join(root, 'guides/p.md'), '---\ntitle: P\nstatus: published\norder: 4\n---\nBody stays.\n', 'utf8')
+  execFileSync('git', ['add', '.'], { cwd: root })
+  execFileSync('git', ['commit', '-qm', 'initial'], { cwd: root })
+  const conf = { id: 'g', source: { type: 'markdown', dir: 'guides' }, fieldMap: { title: 'title', date: 'date', excerpt: 'description', status: 'status' }, statusRule: { draftValue: 'draft' } } as any
+  const src = markdownFactory(conf, { env: () => undefined, fileStore: createLocalFs(root) })
+  const ref = await src.unpublish('p')
+  expect(ref.id).toBe('p')
+  const after = readFileSync(join(root, 'guides/p.md'), 'utf8')
+  expect(after).toContain('status: draft')  // flipped to the rule's draftValue
+  expect(after).toContain('order: 4')        // custom field preserved
+  expect(after).toContain('Body stays.')     // body preserved
+  // round-trip: list + toPost now normalize it back to draft
+  const raws = await src.list()
+  const post = toPost(raws.find((r) => r.slug === 'p')!, conf, new Date('2026-08-16'))
+  expect(post.status).toBe('draft')
+})

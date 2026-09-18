@@ -6,7 +6,7 @@ const raws: RawPost[] = [
   { id: 'a', slug: 'a', fields: { title: 'A', excerpt: 'exc-a' }, raw: {} },
   { id: 'b', slug: 'b', fields: { title: 'B', excerpt: 'exc-b' }, raw: {} },
 ]
-const base = { capabilities: { canWrite: true, enforcesFutureDates: false, supportsTranslations: false }, list: async () => raws, publish: async () => ({ id: 'stub' }), createDraft: async () => ({ id: 'x' }) }
+const base = { capabilities: { canWrite: true, enforcesFutureDates: false, supportsTranslations: false }, list: async () => raws, publish: async () => ({ id: 'stub' }), unpublish: async () => ({ id: 'stub' }), createDraft: async () => ({ id: 'x' }) }
 const cfg = { id: 'p', name: 'P', source: { type: 'markdown', dir: 'd' }, fieldMap: { title: 'title', date: 'date', excerpt: 'excerpt' } } as any
 
 test('gatherToneContext uses body snippets when read() works', async () => {
