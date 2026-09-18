@@ -55,3 +55,11 @@ export async function publishPost(projectId: string, postId: string): Promise<Re
   const source = resolveSource(cfg, { fileStore: createLocalFs('/'), env: envFn, fetchImpl: fetch })
   return source.publish(postId)
 }
+
+export async function unpublishPost(projectId: string, postId: string): Promise<Ref> {
+  const config = await loadConfig()
+  const cfg = config.find((b) => b.id === projectId)
+  if (!cfg) throw new Error(`no project "${projectId}" in config`)
+  const source = resolveSource(cfg, { fileStore: createLocalFs('/'), env: envFn, fetchImpl: fetch })
+  return source.unpublish(postId)
+}
