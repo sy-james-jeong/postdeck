@@ -1,7 +1,7 @@
 'use server'
 
 import type { Draft, Ref } from '@postdeck/core'
-import { generateForProject, saveDraftForProject, type GenerateResult } from '../../lib/write.js'
+import { generateForProject, saveDraftForProject, publishPost, type GenerateResult } from '../../lib/write.js'
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
@@ -22,6 +22,17 @@ export async function saveAction(
 ): Promise<{ ok: true; ref: Ref } | { ok: false; error: string }> {
   try {
     const ref = await saveDraftForProject(input.projectId, input.draft, input.lang || undefined)
+    return { ok: true, ref }
+  } catch (e) {
+    return { ok: false, error: msg(e) }
+  }
+}
+
+export async function publishAction(
+  input: { projectId: string; postId: string },
+): Promise<{ ok: true; ref: Ref } | { ok: false; error: string }> {
+  try {
+    const ref = await publishPost(input.projectId, input.postId)
     return { ok: true, ref }
   } catch (e) {
     return { ok: false, error: msg(e) }

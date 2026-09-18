@@ -47,3 +47,11 @@ export async function saveDraftForProject(projectId: string, draft: Draft, lang?
     lang,
   })
 }
+
+export async function publishPost(projectId: string, postId: string): Promise<Ref> {
+  const config = await loadConfig()
+  const cfg = config.find((b) => b.id === projectId)
+  if (!cfg) throw new Error(`no project "${projectId}" in config`)
+  const source = resolveSource(cfg, { fileStore: createLocalFs('/'), env: envFn, fetchImpl: fetch })
+  return source.publish(postId)
+}
