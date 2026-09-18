@@ -1,6 +1,6 @@
 import {
   resolveSource, generateDraft, deAiReview, slugify,
-  type Draft, type ReviewReport, type Ref, type GenerateInput,
+  type Draft, type ReviewReport, type Ref, type GenerateInput, type BlogSource,
 } from '@postdeck/core'
 import { resolveConfigPath, loadBlogsConfig, createLocalFs, gatherToneContext, selectLLM } from '@postdeck/adapters'
 import { projectOptions, type WritableProject } from './write-format.js'
@@ -62,4 +62,33 @@ export async function unpublishPost(projectId: string, postId: string): Promise<
   if (!cfg) throw new Error(`no project "${projectId}" in config`)
   const source = resolveSource(cfg, { fileStore: createLocalFs('/'), env: envFn, fetchImpl: fetch })
   return source.unpublish(postId)
+}
+
+export interface BulkResult {
+  id: string
+  ok: boolean
+  ref?: Ref
+  error?: string
+}
+
+/** Publish each id sequentially, isolating failures so one bad id does not abort the rest. */
+export async function publishEach(source: BlogSource, postIds: string[]): Promise<BulkResult[]> {
+  const results: BulkResult[] = []
+  for (const id of postIds) {
+    try {
+      const ref = await source.publish(id)
+      results.push({ id, ok: true, ref })
+    } catch (e) {
+      results.push({ id, ok: false, error: e instanceof Error ? e.message : String(e) })
+    }
+  }
+  return results
+}
+
+export async function publishManyPost(projectId: string, postIds: string[]): Promise<BulkResult[]> {
+  const config = await loadConfig()
+  const cfg = config.find((b) => b.id === projectId)
+  if (!cfg) throw new Error(`no project "${projectId}" in config`)
+  const source = resolveSource(cfg, { fileStore: createLocalFs('/'), env: envFn, fetchImpl: fetch })
+  return publishEach(source, postIds)
 }

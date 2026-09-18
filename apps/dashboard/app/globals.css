@@ -102,3 +102,9 @@ th { color:var(--dim); font-size:12px; }
 .preview .hljs-meta { color:var(--dim); }
 .preview .hljs-emphasis { font-style:italic; }
 .preview .hljs-strong { font-weight:700; }
+
+/* bulk publish selection bar */
+.bulkbar { display:flex; align-items:center; gap:10px; margin:6px 0 8px; padding:8px 12px;
+  background:var(--card); border:1px solid var(--line); border-radius:8px; font-size:13px; }
+.bulkbar > span { color:var(--dim); }
+td input[type=checkbox], th input[type=checkbox] { accent-color:var(--pub); cursor:pointer; }
