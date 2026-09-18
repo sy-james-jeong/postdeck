@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import type { Draft } from '@postdeck/core'
 import { generateAction, saveAction } from '../app/write/actions.js'
 import { deAiSummary, type WritableProject } from '../lib/write-format.js'
+import { MarkdownPreview } from './MarkdownPreview.js'
 
 export function WriteForm({ projects }: { projects: WritableProject[] }) {
   const [projectId, setProjectId] = useState(projects[0]?.id ?? '')
@@ -12,6 +13,7 @@ export function WriteForm({ projects }: { projects: WritableProject[] }) {
   const [result, setResult] = useState<{ draft: Draft; summary: string } | null>(null)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState('')
+  const [view, setView] = useState<'preview' | 'raw'>('preview')
   const [pending, start] = useTransition()
 
   const langs = projects.find((p) => p.id === projectId)?.langs ?? []
@@ -73,7 +75,11 @@ export function WriteForm({ projects }: { projects: WritableProject[] }) {
           <p><em>{result.draft.excerpt}</em></p>
           <p className="dim">tags: {result.draft.tags.join(', ') || '—'}</p>
           <p className="dim">De-AI: {result.summary}</p>
-          <pre>{result.draft.body}</pre>
+          <div className="viewtoggle">
+            <button className={view === 'preview' ? 'seg on' : 'seg'} onClick={() => setView('preview')}>Preview</button>
+            <button className={view === 'raw' ? 'seg on' : 'seg'} onClick={() => setView('raw')}>Markdown</button>
+          </div>
+          {view === 'preview' ? <MarkdownPreview markdown={result.draft.body} /> : <pre>{result.draft.body}</pre>}
           <button onClick={onSave} disabled={pending}>Save as draft</button>
           {saved && <p className="ok">saved: {saved}</p>}
         </div>
