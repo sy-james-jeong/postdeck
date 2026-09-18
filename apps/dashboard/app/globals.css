@@ -61,3 +61,7 @@ th { color:var(--dim); font-size:12px; }
 
 .btn-sm { background:var(--pub); color:#04210b; border:0; border-radius:5px; padding:3px 10px; font-size:12px; font-weight:600; cursor:pointer; }
 .btn-sm:disabled { opacity:.5; cursor:default; }
+/* unpublish is a quieter, reversible action — ghost style, not the prominent green. */
+.btn-sm-ghost { background:transparent; color:var(--dim); border:1px solid var(--line); border-radius:5px; padding:3px 10px; font-size:12px; font-weight:600; cursor:pointer; }
+.btn-sm-ghost:hover { color:var(--text); border-color:var(--dim); }
+.btn-sm-ghost:disabled { opacity:.5; cursor:default; }
