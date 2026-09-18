@@ -3,10 +3,16 @@ import type { ReviewReport, BlogsConfig } from '@postdeck/core'
 export interface WritableProject {
   id: string
   name: string
+  /** Configured target languages (astro-collection only); empty for single-lang sources. */
+  langs: string[]
 }
 
 export function projectOptions(config: BlogsConfig): WritableProject[] {
-  return config.map((b) => ({ id: b.id, name: b.name ?? b.id }))
+  return config.map((b) => ({
+    id: b.id,
+    name: b.name ?? b.id,
+    langs: b.source.type === 'astro-collection' ? b.source.langs : [],
+  }))
 }
 
 export function deAiSummary(report: ReviewReport): string {
