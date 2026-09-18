@@ -6,11 +6,16 @@ import { config as loadDotenv } from 'dotenv'
 import { resolveConfigPath, loadBlogsConfig } from '@postdeck/adapters'
 import { parseArgs } from './args.js'
 import { runWrite } from './write.js'
+import { runPublish } from './publish.js'
 
 export async function main(): Promise<void> {
   const argv0 = process.argv.slice(2)
   if (argv0[0] === 'write') {
     await runWrite(argv0.slice(1))
+    return
+  }
+  if (argv0[0] === 'publish') {
+    await runPublish(argv0.slice(1))
     return
   }
 
