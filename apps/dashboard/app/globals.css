@@ -81,3 +81,24 @@ th { color:var(--dim); font-size:12px; }
 .preview pre code { border:0; padding:0; }
 .preview blockquote { border-left:3px solid var(--line); margin:0; padding-left:12px; color:var(--dim); }
 .preview img { max-width:100%; }
+
+/* GFM tables + task lists in the preview */
+.preview table { border-collapse:collapse; margin:12px 0; font-size:13px; display:block; overflow-x:auto; }
+.preview th,.preview td { border:1px solid var(--line); padding:6px 10px; text-align:left; }
+.preview th { background:var(--bg); color:var(--dim); font-weight:600; }
+.preview del { color:var(--dim); }
+.preview li.task-list-item,.preview ul:has(li input) { list-style:none; }
+.preview li input[type=checkbox] { margin-right:6px; }
+
+/* rehype-highlight (highlight.js) tokens — compact dark theme scoped to the preview */
+.preview .hljs { color:var(--text); background:transparent; }
+.preview .hljs-comment,.preview .hljs-quote { color:var(--dim); font-style:italic; }
+.preview .hljs-keyword,.preview .hljs-selector-tag,.preview .hljs-literal,.preview .hljs-doctag { color:#c792ea; }
+.preview .hljs-string,.preview .hljs-attr,.preview .hljs-template-tag { color:#a5e075; }
+.preview .hljs-number,.preview .hljs-symbol,.preview .hljs-bullet { color:#f78c6c; }
+.preview .hljs-title,.preview .hljs-name,.preview .hljs-section,.preview .hljs-built_in { color:#82aaff; }
+.preview .hljs-type,.preview .hljs-class .hljs-title { color:#ffcb6b; }
+.preview .hljs-variable,.preview .hljs-tag,.preview .hljs-regexp { color:#f07178; }
+.preview .hljs-meta { color:var(--dim); }
+.preview .hljs-emphasis { font-style:italic; }
+.preview .hljs-strong { font-weight:700; }
