@@ -43,8 +43,19 @@ export const markdownFactory: SourceFactory = (cfg, deps) => {
       }
       throw new Error(`markdown read: no post with id "${id}" in ${dir}`)
     },
-    async publish(): Promise<Ref> {
-      throw new Error('publish() not implemented')
+    async publish(id: string): Promise<Ref> {
+      const files = (await fs.list(dir)).filter((f) => f.endsWith('.md'))
+      for (const f of files) {
+        const content = await fs.read(`${dir}/${f}`)
+        const raw = parseFrontmatter(content).data
+        const slug = String(raw[fm.slug ?? 'slug'] ?? basename(f, '.md'))
+        if (slug !== id) continue
+        const patched = patchFrontmatter(content, { [fm.status ?? 'status']: cfg.publishStatus ?? 'published' })
+        const path = `${dir}/${f}`
+        await fs.write(path, patched, { message: `blog: publish ${slug}` })
+        return { id: slug, path }
+      }
+      throw new Error(`markdown publish: no post with id "${id}" in ${dir}`)
     },
     async createDraft(input: DraftInput): Promise<Ref> {
       // Build a template with a draft marker, then patch mapped keys by their SOURCE names.
