@@ -85,6 +85,16 @@ export const notionFactory: SourceFactory = (cfg, deps) => {
       if (j.object === 'error') throw new Error(`Notion ${j.status} ${j.code}: ${j.message}`)
       return { id: j.id, url: j.url }
     },
+    async unpublish(id: string): Promise<Ref> {
+      if (!fm.status) throw new Error('notion unpublish: fieldMap.status is required to unpublish')
+      const res = await doFetch(`https://api.notion.com/v1/pages/${id}`, {
+        method: 'PATCH', headers: H,
+        body: JSON.stringify({ properties: { [fm.status]: { status: { name: cfg.statusRule?.draftValue ?? 'Draft' } } } }),
+      })
+      const j: any = await res.json()
+      if (j.object === 'error') throw new Error(`Notion ${j.status} ${j.code}: ${j.message}`)
+      return { id: j.id, url: j.url }
+    },
     async createDraft(input: DraftInput): Promise<Ref> {
       const props: any = {
         [fm.title]: { title: [{ text: { content: input.title } }] },

@@ -71,6 +71,25 @@ export const astroCollectionFactory: SourceFactory = (cfg, deps) => {
       }
       throw new Error(`astro publish: no post for id "${id}" in ${src.dir}`)
     },
+    async unpublish(id: string): Promise<Ref> {
+      const slash = id.indexOf('/')
+      const lang = slash >= 0 ? id.slice(0, slash) : src.langs[0]
+      const slug = slash >= 0 ? id.slice(slash + 1) : id
+      for (const ext of ['.md', '.mdx']) {
+        const path = `${src.dir}/${lang}/${slug}${ext}`
+        let content: string
+        try {
+          content = await fs.read(path)
+        } catch (e: any) {
+          if (e?.code === 'ENOENT') continue
+          throw e
+        }
+        const patched = patchFrontmatter(content, { [fm.draft ?? 'draft']: true })
+        await fs.write(path, patched, { message: `blog: unpublish ${lang}/${slug}` })
+        return { id: `${lang}/${slug}`, path }
+      }
+      throw new Error(`astro unpublish: no post for id "${id}" in ${src.dir}`)
+    },
     async createDraft(input: DraftInput): Promise<Ref> {
       const lang = input.lang ?? src.langs[0]
       const template = `---\n${fm.draft ?? 'draft'}: true\n---\n\n${input.body}\n`

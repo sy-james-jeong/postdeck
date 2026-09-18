@@ -51,6 +51,7 @@ test('writeDraft generates, reviews, and saves the REVISED body via createDraft'
     list: async () => [],
     read: async () => { throw new Error('nope') },
     publish: async () => ({ id: 'stub' }),
+    unpublish: async () => ({ id: 'stub' }),
     createDraft: async (input) => { saved = input; return { id: input.slug, path: `x/${input.slug}.md` } },
   }
   const { ref, result } = await writeDraft(INPUT, { llm, source })
