@@ -83,8 +83,9 @@ export async function runWrite(argv: string[]): Promise<void> {
   } catch (err) {
     if (isMissingCredentialError(err)) {
       console.error(
-        'postdeck write: no LLM credentials. Set GEMINI_API_KEY (default provider) or ANTHROPIC_API_KEY in .env — ' +
-          'or set POSTDECK_LLM to pick a provider.',
+        'postdeck write: no LLM credentials. Set the key for your provider in .env — ' +
+          'GEMINI_API_KEY (default), ANTHROPIC_API_KEY, or OPENAI_API_KEY — ' +
+          'and POSTDECK_LLM (gemini | anthropic | openai) to pick one.',
       )
       process.exit(1)
     }
