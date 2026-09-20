@@ -13,6 +13,10 @@ test('selectLLM returns anthropic when POSTDECK_LLM=anthropic', () => {
   const llm = selectLLM(withEnv({ POSTDECK_LLM: 'anthropic', ANTHROPIC_API_KEY: 'x' }))
   expect(typeof llm.complete).toBe('function')
 })
+test('selectLLM returns openai when POSTDECK_LLM=openai', () => {
+  const llm = selectLLM(withEnv({ POSTDECK_LLM: 'openai', OPENAI_API_KEY: 'x' }))
+  expect(typeof llm.complete).toBe('function')
+})
 test('selectLLM throws on an unknown provider', () => {
   expect(() => selectLLM(withEnv({ POSTDECK_LLM: 'bogus' }))).toThrow(/POSTDECK_LLM/)
 })
